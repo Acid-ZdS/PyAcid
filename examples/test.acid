@@ -1,4 +1,4 @@
-(def add (lambda (x y)
+(define add (lambda (x y)
 	(+ x y)
 ))
 

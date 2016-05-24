@@ -23,6 +23,7 @@ class TokenType(Enum):
 	def __init__(self, pattern):
 		self.regex = re.compile(pattern)
 
+	DEFINE = r'define'
 	LAMBDA = r'lambda'
 	LPAREN, RPAREN = r'\(', r'\)'
 	FLOAT_LITERAL = r'\d+\.\d+'

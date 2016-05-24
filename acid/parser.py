@@ -150,6 +150,32 @@ class Lambda(Expr):
 		return Lambda(params, body)
 
 
+class Declaration(Expr):
+	"""
+	Lambda function definition.
+	ex: `(lambda (x y) (+ x y))`
+	"""
+
+	abstract = False
+	priority = 1
+
+	def __init__(self, name, value):
+		self.name = name
+		self.value = value
+
+	@classmethod
+	def feed(cls, token_queue):
+		expect(TokenType.LPAREN, token_queue)
+		expect(TokenType.DEFINE, token_queue)
+
+		atom = expect(TokenType.ATOM, token_queue)
+		name = atom.value
+
+		value = Expr.consume(token_queue)
+		expect(TokenType.RPAREN, token_queue)
+		return Declaration(name, value)
+
+
 class Variable(Expr):
 	"""
 	Variable name.
@@ -157,7 +183,7 @@ class Variable(Expr):
 	"""
 
 	abstract = False
-	priority = 1
+	priority = 3
 
 	def __init__(self, name):
 		self.name = name
@@ -175,7 +201,7 @@ class Literal(Expr):
 	"""
 
 	abstract = True
-	priority = 1
+	priority = 3
 
 	def __init__(self, value):
 		self.value = value
