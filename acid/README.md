@@ -19,9 +19,11 @@ On appelle ça un arbre car on représente souvent le résultat sous cette forme
 (troisième étape):
 
 ```
-                                                +
-                     +--------+                / \
-(+ (* 3 2) 7)     ---| parser |-->            *   7
-                     +--------+              / \
-                                            3   2
+                                parenthèse, plus,                                 +
+                  +-------+     étoile, nombre(2),            +--------+         / \
+(+ (* 3 2) 7)  ---| lexer |-->  nombre(3), parenthèse      ---| parser |-->     *   7
+                  +-------+     nombre(7), parenthèse         +--------+       / \
+                                                                              3   2
+
+     CODE                             LEXEMES                                   AST
 ```
