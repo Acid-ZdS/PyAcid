@@ -20,9 +20,9 @@ On appelle ça un arbre car on représente souvent le résultat sous cette forme
 
 ```
                                    parenthèse, plus,                                 +
-                  +-------+        parenthèse, étoile,           +--------+         / \
-(+ (* 3 2) 7)  ---| lexer |-->     nombre(3), nombre(2),      ---| parser |-->     *   7
-                  +-------+        parenthèse, nombre(7),        +--------+       / \
+                  ┌───────┐        parenthèse, étoile,           ┌────────┐         / \
+(+ (* 3 2) 7)  ───┤ lexer ├─▶      nombre(3), nombre(2),      ───┤ parser ├──▶     *   7
+                  └───────┘        parenthèse, nombre(7),        └────────┘       / \
                                    parenthèse                                    3   2
 
      CODE                             LEXEMES                                   AST
