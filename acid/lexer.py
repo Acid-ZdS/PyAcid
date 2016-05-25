@@ -12,7 +12,7 @@ import re
 from enum import Enum
 from itertools import dropwhile
 
-from acid.types import SourcePos
+from acid.types import SourcePos, SourceSpan
 from acid.exception import ParseError
 
 
@@ -41,14 +41,18 @@ class Token:
 	Concrete lexeme type.
 	"""
 
-	def __init__(self, type, value, pos):
+	def __init__(self, type, value, span):
 		self.type = type
 		self.value = value
-		self.pos = pos
+		self.span = span
 
 	def __repr__(self):
-		fmt = 'Token(type={tok.type}, value={tok.value!r}, pos={tok.pos!s})'
+		fmt = 'Token(type={tok.type}, value={tok.value!r}, span={tok.span!r})'
 		return fmt.format(tok=self)
+
+	@property
+	def pos(self):
+		return self.span.start
 
 
 def tokenize(code):
@@ -64,6 +68,9 @@ def tokenize(code):
 			match = token_type.regex.match(code)
 
 			if match is not None:
+				# source position before the code is consumed
+				startpos = cursor.copy()
+
 				# pop the matched string
 				code = code[match.end():]
 
@@ -98,9 +105,11 @@ def tokenize(code):
 				# skipping whitespace
 				elif token_type is not TokenType.WHITESPACE:
 						# copy the cursor to avoid unwanted reference
-						pos = cursor.copy()
+						endpos = cursor.copy()
 
-						yield Token(token_type, value, pos)
+						span = SourceSpan(startpos, endpos)
+
+						yield Token(token_type, value, span)
 
 				break
 		else:

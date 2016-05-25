@@ -40,3 +40,26 @@ class SourcePos:
 		"""
 
 		return SourcePos(line=self.line, column=self.column)
+
+
+class SourceSpan:
+	"""
+	Represents a span between two positions in a file.
+	"""
+
+	def __init__(self, start, end):
+		self.start = start
+		self.end = end
+
+	def __repr__(self):
+		return 'SourceSpan(start={0.start!r}, end={0.end!r})'.format(self)
+
+	def __str__(self):
+		if self.start.line == self.end.line:
+			fmt = 'line {line} from column {colstart} to column {colend}'
+			return fmt.format(line=self.start.line,
+					   		  colstart=self.start.column,
+					   		  colend=self.end.column)
+
+		else:
+			return '{0.start!s} to {0.end!s}'.format(self)
