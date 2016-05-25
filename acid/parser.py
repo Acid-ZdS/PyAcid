@@ -3,6 +3,24 @@
 
 """
 Defines the AST structure of programs and expressions.
+
+To add an expression type, use the following template:
+
+class CustomExpr(Expr):
+
+	abstract = # True if your type is not meant to be parsed directly, but
+			   # subclassed first, and False otherwise
+
+	priority = # an integer defining the order in which expression types try
+			   # to parse from the token queue. The closest this number if from
+			   # 0, the highest will be its priority.
+
+	def __init__(self, [*args]):
+		...  # your constructor code
+
+	@classmethod
+	def feed(self, token_queue):
+		...  # your parsing method
 """
 
 __all__ = [
@@ -30,6 +48,7 @@ class Program:
 		self.path = path
 
 
+# question: is ABC needed ?
 class Expr(ABC):
 	"""
 	Abstract AST element.
@@ -137,8 +156,6 @@ class Lambda(Expr):
 		expect(TokenType.LAMBDA, token_queue)
 		expect(TokenType.LPAREN, token_queue)
 
-		token = token_queue.pop(0)
-
 		params = []
 		while token_queue[0].type == TokenType.ATOM:
 			token = token_queue.pop(0)
@@ -236,6 +253,10 @@ class FloatLiteral(Literal):
 
 
 def resolve_node_order(expr_type=Expr):
+	"""
+	Yields the different expression types according to their priority.
+	"""
+
 	subclasses = expr_type.__subclasses__()
 	subclasses.sort(key=lambda typ: typ.priority)
 
@@ -247,23 +268,39 @@ def resolve_node_order(expr_type=Expr):
 
 
 def parse(code, path=None):
-	token_queue = list(tokenize(code))
-	instrs = []
+	"""
+	Parses a given string into a Program object.
+	"""
+
+	token_queue = list(tokenize(code))  # the tokenized string
+	instrs = []                         # the instructions of the program
 
 	while token_queue:
 		try:
+			# tries to parse an expression from the token queue
 			instr = Expr.consume(token_queue)
-		except ParseError as error:
-			raise
+		except ParseError:
+			raise  # when no expression could be parsed
 		else:
+			# append the instruction to the program
 			instrs.append(instr)
 
+	# returns the resulting Program object.
 	return Program(instrs, path)
 
 
 def expect(token_type, token_queue):
+	"""
+	Tries to consume a single token from the token queue.
+	Returns the token if the next token is of the given type, raises a
+	ParseError otherwise.
+	"""
+
 	token = token_queue.pop(0)
+
+	# if the next token is not of the expected type
 	if token.type != token_type:
 		msg = 'Expected {}, got {}'.format(token_type.name, token.type.name)
 		raise ParseError(token.pos, msg)
+
 	return token

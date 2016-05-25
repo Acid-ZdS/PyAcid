@@ -21,12 +21,22 @@ class SourcePos:
 		return 'line {pos.line}, column {pos.column}'.format(pos=self)
 
 	def feed(self, string):
+		"""
+		Updates the position from a given string.
+
+		Note: This code assumes that the string contains UNIX line terminators.
+		"""
+
 		for char in string:
 			if char == '\n':
-				self.line += 1
-				self.column = 1
+				self.line += 1   # increment line
+				self.column = 1  # reset column index
 			else:
 				self.column += 1
 
 	def copy(self):
+		"""
+		Copies the instance to avoid unwanted references.
+		"""
+
 		return SourcePos(line=self.line, column=self.column)

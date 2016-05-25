@@ -15,6 +15,7 @@ from acid.types import SourcePos
 from acid.exception import ParseError
 
 
+# derive from Enum to allow iteration through the token types
 class TokenType(Enum):
 	"""
 	Lists every token type and stores their regular expression pattern.
@@ -51,23 +52,29 @@ def tokenize(code):
 	"""
 	Chop the given string in Token instances.
 	"""
-
-	remaining = code
+	
 	cursor = SourcePos(line=1, column=1)
 
-	while remaining:
+	while code:
 		# iterates over all TokenType instances in order
 		for token_type in TokenType:
-			match = token_type.regex.match(remaining)
+			match = token_type.regex.match(code)
 
 			if match is not None:
-				remaining = remaining[match.end():]
+				# pop the matched string
+				code = code[match.end():]
 
 				# skipping whitespace
 				if token_type is not TokenType.WHITESPACE:
+					# value is assigned to the entire match string
 					value = match.group(0)
+
+					# update cursor position (line and column index)
 					cursor.feed(value)
+
+					# copy the cursor to avoid unwanted reference
 					pos = cursor.copy()
+
 					yield Token(token_type, value, pos)
 
 				break
