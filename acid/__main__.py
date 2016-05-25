@@ -28,7 +28,7 @@ def main(path, lex=False, ast=False, compile=True):
 				print(token)
 
 		if ast:
-			tree = parse(code)
+			tree = parse(code, path)
 			print(tree)
 
 		if compile:
