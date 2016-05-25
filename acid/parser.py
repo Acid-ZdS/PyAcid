@@ -29,6 +29,7 @@ class Parser:
 
 	def __init__(self, code, path=None):
 		self.path = path
+		self.error = None
 
 		with open(path) as file:
 			self.code = file.read()
@@ -83,13 +84,14 @@ class Parser:
 		for consumer in self.consumers:
 			try:
 				node = consumer(self, token_queue)
-			except ParseError:
+			except ParseError as e:
+				error = e
 				continue
 			else:
 				return node
 		else:
 			# when every expr node has been tried, but none succeeded to parse
-			raise ParseError(token_queue[0].pos, 'Failed to parse code')
+			raise error
 
 
 	def run(self):
