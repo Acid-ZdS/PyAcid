@@ -22,6 +22,8 @@ Pour télécharger PyAcid, il vous suffit de cloner le dépot GitHub:
 git clone https://github.com/Acid-ZdS/PyAcid.git
 ```
 
+Si vous ne voulez pas télécharger git, vous pouvez télécharger une archive ZIP.
+
 ### Essayer PyAcid
 
 Afin d'exécuter PyAcid, il faut vous rendre dans le dossier que vous avez

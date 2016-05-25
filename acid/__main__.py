@@ -13,7 +13,7 @@ from acid import tokenize, parse
 
 
 arg_parser = argparse.ArgumentParser(
-	prog='Acid compiler',
+	prog='acid',
 	description="Tokenize, parse, compile or execute the given input file"
 )
 arg_parser.add_argument('path', metavar='PATH', help='the input file')
