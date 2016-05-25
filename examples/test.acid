@@ -2,4 +2,8 @@
 	(+ x y)
 ))
 
+// ligne de commentaire
+
+/* bloc de commentaire */
+
 (print (add 1 3))
