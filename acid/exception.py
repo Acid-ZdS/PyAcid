@@ -4,8 +4,6 @@
 """
 This module defines some exception that may be raised during tokenizing,
 parsing, or execution.
-
-Contributors: myrma
 """
 
 
