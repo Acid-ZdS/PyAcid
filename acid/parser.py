@@ -21,6 +21,8 @@ class CustomExpr(Expr):
 	@classmethod
 	def feed(self, token_queue):
 		...  # your parsing method
+
+Contributors: myrma
 """
 
 __all__ = [

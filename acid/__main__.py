@@ -1,6 +1,12 @@
 #!/usr/bin/env python3.4
 # coding: utf-8
 
+"""
+Entry for the Acid parser/lexer/compiler/interpreter.
+
+Contributors: myrma
+"""
+
 import argparse
 
 from acid import tokenize, parse
