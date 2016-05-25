@@ -19,7 +19,7 @@ arg_parser.add_argument('--compile', '-c', dest='compile', action='store_true',
 						help='compile the given input file')
 
 
-def main(path, lex=False, ast=False, compile=True):
+def main(path, lex=False, ast=False, compile=False):
 	with open(path) as file:
 		code = file.read()
 
@@ -27,15 +27,17 @@ def main(path, lex=False, ast=False, compile=True):
 			for token in tokenize(code):
 				print(token)
 
-		if ast:
+		elif ast:
 			tree = parse(code, path)
 			print(tree)
 
-		if compile:
+		elif compile:
 			raise NotImplementedError('Compiling is not implemented yet')
 
-		# when the interpreter will be implemented
-		# execute(code)
+		else:
+			raise NotImplementedError('The interpreter is not implemented yet')
+			# when the interpreter will be implemented
+			# execute(code)
 
 if __name__ == '__main__':
 	args = arg_parser.parse_args()
