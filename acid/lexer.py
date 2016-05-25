@@ -3,8 +3,6 @@
 
 """
 Defines some types and functions for tokenizing a given code string.
-
-Contributors: myrma
 """
 
 __all__ = ['TokenType', 'Token', 'tokenize']

@@ -3,8 +3,6 @@
 
 """
 Defines some types that are used by several modules in the package.
-
-Contributors: myrma
 """
 
 
