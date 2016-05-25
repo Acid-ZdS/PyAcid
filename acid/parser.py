@@ -257,13 +257,20 @@ def resolve_node_order(expr_type=Expr):
 	Yields the different expression types according to their priority.
 	"""
 
+	# list every subclasses of the given type
 	subclasses = expr_type.__subclasses__()
+
+	# sort the types by their priority
 	subclasses.sort(key=lambda typ: typ.priority)
+
 
 	for sub_expr_type in subclasses:
 		if sub_expr_type.abstract:
+			# yield every concrete subtypes
 			yield from resolve_node_order(sub_expr_type)
 		else:
+			# when the type is concrete (i.e. when sub_expr_type.abstract is
+			# False)
 			yield sub_expr_type
 
 
