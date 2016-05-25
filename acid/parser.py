@@ -46,8 +46,12 @@ class Program:
 	"""
 
 	def __init__(self, instructions, path=None):
-		self.instructions = instructions
 		self.path = path
+		self.instructions = instructions
+
+	def __repr__(self):
+		fmt = 'Program(path={0.path!r}, instructions={0.instructions})'
+		return fmt.format(self)
 
 
 # question: is ABC needed ?
@@ -118,6 +122,9 @@ class Call(Expr):
 		self.name = name
 		self.args = args
 
+	def __repr__(self):
+		return 'Call(name={0.name!r}, args={0.args})'.format(self)
+
 	@classmethod
 	def feed(cls, token_queue):
 		expect(TokenType.LPAREN, token_queue)
@@ -152,6 +159,9 @@ class Lambda(Expr):
 		self.params = params
 		self.body = body
 
+	def __repr__(self):
+		return 'Lambda(params={0.params!r}, body={0.body!r})'.format(self)
+
 	@classmethod
 	def feed(cls, token_queue):
 		expect(TokenType.LPAREN, token_queue)
@@ -182,6 +192,9 @@ class Declaration(Expr):
 		self.name = name
 		self.value = value
 
+	def __repr__(self):
+		return 'Declaration(name={0.name!r}, value={0.value!r})'.format(self)
+
 	@classmethod
 	def feed(cls, token_queue):
 		expect(TokenType.LPAREN, token_queue)
@@ -207,6 +220,9 @@ class Variable(Expr):
 	def __init__(self, name):
 		self.name = name
 
+	def __repr__(self):
+		return 'Variable(name={0.name!r})'.format(self)
+
 	@classmethod
 	def feed(cls, token_queue):
 		atom = expect(TokenType.ATOM, token_queue)
@@ -224,6 +240,9 @@ class Literal(Expr):
 
 	def __init__(self, value):
 		self.value = value
+
+	def __repr__(self):
+		return '{0.__class__.__name__}(value={0.value!r})'.format(self)
 
 
 class IntLiteral(Literal):

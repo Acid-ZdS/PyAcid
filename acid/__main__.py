@@ -7,6 +7,7 @@ Entry for the Acid parser/lexer/compiler/interpreter.
 Contributors: myrma
 """
 
+import os
 import argparse
 
 from acid import tokenize, parse
@@ -34,7 +35,7 @@ def main(path, lex=False, ast=False, compile=False):
 				print(token)
 
 		elif ast:
-			tree = parse(code, path)
+			tree = parse(code, os.path.abspath(path))
 			print(tree)
 
 		elif compile:
