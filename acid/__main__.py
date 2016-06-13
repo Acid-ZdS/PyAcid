@@ -10,7 +10,8 @@ Contributors: myrma
 import os
 import argparse
 
-from acid import *
+from parser import Parser
+from compiler import Compiler
 
 
 arg_parser = argparse.ArgumentParser(
@@ -32,7 +33,7 @@ def main(path, lex=False, ast=False, comp=False):
 	if lex:
 		with open(path) as file:
 			code = file.read()
-			
+
 			for token in tokenize(code):
 				print(token)
 
