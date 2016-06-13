@@ -30,8 +30,11 @@ def main(path, lex=False, ast=False, comp=False):
 	path = os.path.abspath(path)
 
 	if lex:
-		for token in tokenize(code):
-			print(token)
+		with open(path) as file:
+			code = file.read()
+			
+			for token in tokenize(code):
+				print(token)
 
 	elif ast:
 		parser = Parser.from_file(path)
