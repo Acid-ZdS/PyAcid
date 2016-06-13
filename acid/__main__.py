@@ -10,8 +10,8 @@ Contributors: myrma
 import os
 import argparse
 
-from parser import Parser
-from compiler import Compiler
+from acid.parser import Parser
+from acid.compiler import Compiler
 
 
 arg_parser = argparse.ArgumentParser(
