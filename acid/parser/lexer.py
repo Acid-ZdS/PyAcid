@@ -116,4 +116,4 @@ def tokenize(code):
 				break
 		else:
 			# when every token type has been tried
-			raise ParseError(pos, "Failed to tokenize code")
+			raise ParseError(cursor, "Failed to tokenize code")
