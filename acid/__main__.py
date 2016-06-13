@@ -10,7 +10,7 @@ Contributors: myrma
 import os
 import argparse
 
-from acid.parser import Parser
+from acid.parser import Parser, tokenize
 from acid.compiler import Compiler
 
 
