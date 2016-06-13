@@ -141,12 +141,12 @@ class FloatLiteral(Literal):
 class CharLiteral(Literal):
 	"""
 	Literal character. May be escaped.
-	ex: `'a'`, `'\t'`
+	ex: `'a'`, `'\\t'`
 	"""
 
 
 class StringLiteral(Literal):
 	"""
 	Literal sequence of potentially escaped characters.
-	ex: `"this is a string !\nnew line here"`
+	ex: `"this is a string !\\nnew line here"`
 	"""
