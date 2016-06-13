@@ -46,7 +46,7 @@ class Compiler:
 		with open(path, 'rb') as compiled_file:
 			code = marshal.load(compiled_file)
 
-			exec(code, prelude)
+			exec(code, prelude.copy())
 
 	@classmethod
 	def register(cls, *node_types):
@@ -100,4 +100,4 @@ class Compiler:
 		"""
 
 		code = self.compile()
-		exec(code, prelude)
+		exec(code, prelude.copy())
