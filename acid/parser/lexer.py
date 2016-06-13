@@ -32,6 +32,8 @@ class TokenType(Enum):
 	LINE_COMMENT = r'//'
 	COMMENT_START, COMMENT_END = r'/\*', r'\*/'
 	LPAREN, RPAREN = r'\(', r'\)'
+	CHAR_LITERAL = r"'([^'\\]|\\.)'"
+	STRING_LITERAL = r'"([^"\\]|\\.)*"'
 	FLOAT_LITERAL = r'\d+\.\d+'
 	INT_LITERAL = r'\d+'
 	ATOM = r"[\w+\-'*/:,$<>=~#&|@ç^_%!?.]+"

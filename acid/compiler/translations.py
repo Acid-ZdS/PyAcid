@@ -67,3 +67,8 @@ def translate_variable(compiler, var):
 @Compiler.register(IntLiteral, FloatLiteral)
 def translate_num(compiler, num):
 	return python_ast.Num(num.value)
+
+
+@Compiler.register(CharLiteral, StringLiteral)
+def translate_string_or_char(compiler, string_or_char):
+	return python_ast.Str(string_or_char.value)

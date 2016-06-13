@@ -92,6 +92,20 @@ def consume_int_literal(self, token_queue):
 
 
 @Parser.register_expr(priority=1)
-def consume_int_literal(self, token_queue):
+def consume_float_literal(self, token_queue):
 	token = expect(TokenType.FLOAT_LITERAL, token_queue)
 	return FloatLiteral(float(token.value))
+
+@Parser.register_expr(priority=1)
+def consume_char_literal(self, token_queue):
+	token = expect(TokenType.CHAR_LITERAL, token_queue)
+	char = token.value.strip("'")
+	return CharLiteral(char)
+
+@Parser.register_expr(priority=1)
+def consume_string_literal(self, token_queue):
+	token = expect(TokenType.STRING_LITERAL, token_queue)
+
+	# todo: find another way to unescape strings
+	string = token.value.strip('"').encode('latin-1').decode('unicode_escape')
+	return StringLiteral(string)

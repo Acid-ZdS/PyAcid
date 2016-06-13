@@ -8,11 +8,13 @@ Contributors: myrma
 """
 
 __all__ = [
-	'Program',                                   # program AST
-	'Stmt', 'Expr', 'Literal',                   # abstract AST nodes
-	'Declaration', 'TopLevelExpr',               # top-level statement
-	'Call', 'Lambda',                            # calls
-	'Variable', 'IntLiteral', 'FloatLiteral',    # atoms
+	'Program',                       # program AST
+	'Stmt', 'Expr', 'Literal',       # abstract AST nodes
+	'Declaration', 'TopLevelExpr',   # top-level statement
+	'Call', 'Lambda',                # calls
+	'Variable',                      # atom
+	'IntLiteral', 'FloatLiteral',    # numeric literal
+	'CharLiteral', 'StringLiteral'   # string-related literals
 ]
 
 
@@ -133,4 +135,18 @@ class FloatLiteral(Literal):
 	"""
 	Floating point number literal expression.
 	ex: `3.14`
+	"""
+
+
+class CharLiteral(Literal):
+	"""
+	Literal character. May be escaped.
+	ex: `'a'`, `'\t'`
+	"""
+
+
+class StringLiteral(Literal):
+	"""
+	Literal sequence of potentially escaped characters.
+	ex: `"this is a string !\nnew line here"`
 	"""
