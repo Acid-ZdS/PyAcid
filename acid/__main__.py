@@ -10,7 +10,7 @@ Contributors: myrma
 import os
 import argparse
 
-from acid import tokenize, parse
+from acid import *
 
 
 arg_parser = argparse.ArgumentParser(
@@ -22,29 +22,32 @@ arg_parser.add_argument('--lex', '-l', dest='lex', action='store_true',
                    		help='tokenize the given input file')
 arg_parser.add_argument('--ast', '-a', dest='ast', action='store_true',
                    		help='parse the given input file')
-arg_parser.add_argument('--compile', '-c', dest='compile', action='store_true',
-						help='compile the given input file')
+arg_parser.add_argument('--compile', '-c', dest='comp', action='store_true',
+                   		help='compile the given input file')
 
 
-def main(path, lex=False, ast=False, compile=False):
-	with open(path) as file:
-		code = file.read()
+def main(path, lex=False, ast=False, comp=False):
+	path = os.path.abspath(path)
 
-		if lex:
-			for token in tokenize(code):
-				print(token)
+	if lex:
+		for token in tokenize(code):
+			print(token)
 
-		elif ast:
-			tree = parse(code, os.path.abspath(path))
-			print(tree)
+	elif ast:
+		parser = Parser.from_file(path)
+		tree = parser.run()
+		print(tree)
 
-		elif compile:
-			raise NotImplementedError('Compiling is not implemented yet')
+	elif comp:
+		compiler = Compiler.from_file(path)
+		compiler.dump()
 
+	else:
+		if path.endswith('.acidc'):
+			Compiler.execute_compiled_file(path)
 		else:
-			raise NotImplementedError('The interpreter is not implemented yet')
-			# when the interpreter will be implemented
-			# execute(code)
+			compiler = Compiler.from_file(path)
+			compiler.execute()
 
 if __name__ == '__main__':
 	args = arg_parser.parse_args()
