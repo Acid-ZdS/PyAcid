@@ -14,7 +14,7 @@ import re
 from enum import Enum
 from itertools import dropwhile
 
-from acid.types import SourcePos, SourceSpan
+from acid.parser.types import SourcePos, SourceSpan
 from acid.exception import ParseError
 
 
@@ -32,6 +32,8 @@ class TokenType(Enum):
 	LINE_COMMENT = r'//'
 	COMMENT_START, COMMENT_END = r'/\*', r'\*/'
 	LPAREN, RPAREN = r'\(', r'\)'
+	CHAR_LITERAL = r"'([^'\\]|\\.)'"
+	STRING_LITERAL = r'"([^"\\]|\\.)*"'
 	FLOAT_LITERAL = r'\d+\.\d+'
 	INT_LITERAL = r'\d+'
 	ATOM = r"[\w+\-'*/:,$<>=~#&|@ç^_%!?.]+"
@@ -116,4 +118,4 @@ def tokenize(code):
 				break
 		else:
 			# when every token type has been tried
-			raise ParseError(pos, "Failed to tokenize code")
+			raise ParseError(cursor, "Failed to tokenize code")

@@ -6,4 +6,5 @@
 
 /* bloc de commentaire */
 
+(print "Le résultat est:\n")
 (print (add 1 3))

@@ -8,10 +8,13 @@ Contributors: myrma
 """
 
 __all__ = [
-	'Program',                                   # program AST
-	'Expr', 'Literal',                           # abstract AST nodes
-	'Call', 'Lambda', 'Declaration',             # calls
-	'Variable', 'IntLiteral', 'FloatLiteral',    # atoms
+	'Program',                       # program AST
+	'Stmt', 'Expr', 'Literal',       # abstract AST nodes
+	'Declaration', 'TopLevelExpr',   # top-level statement
+	'Call', 'Lambda',                # calls
+	'Variable',                      # atom
+	'IntLiteral', 'FloatLiteral',    # numeric literal
+	'CharLiteral', 'StringLiteral'   # string-related literals
 ]
 
 
@@ -29,9 +32,42 @@ class Program:
 		return fmt.format(self)
 
 
+class Stmt:
+	"""
+	Abstract AST element representing a top-level statement.
+	"""
+
+
+class Declaration(Stmt):
+	"""
+	Declaring a name.
+	ex: `(define pi 3.14)`
+	"""
+
+	def __init__(self, name, value):
+		self.name = name
+		self.value = value
+
+	def __repr__(self):
+		return 'Declaration(name={0.name!r}, value={0.value!r})'.format(self)
+
+
+class TopLevelExpr(Stmt):
+	"""
+	Regular expression at top-level.
+	ex: `(+ 1 2)`
+	"""
+
+	def __init__(self, expr):
+		self.expr = expr
+
+	def __repr__(self):
+		return 'TopLevelExpr(expr={0.expr!r})'.format(self)
+
+
 class Expr:
 	"""
-	Abstract AST element.
+	Abstract AST element representing an expression node.
 	"""
 
 
@@ -41,12 +77,12 @@ class Call(Expr):
 	ex: `(func x y z)`
 	"""
 
-	def __init__(self, name, args):
-		self.name = name
+	def __init__(self, func, args):
+		self.func = func
 		self.args = args
 
 	def __repr__(self):
-		return 'Call(name={0.name!r}, args={0.args})'.format(self)
+		return 'Call(func={0.func!r}, args={0.args})'.format(self)
 
 
 class Lambda(Expr):
@@ -61,20 +97,6 @@ class Lambda(Expr):
 
 	def __repr__(self):
 		return 'Lambda(params={0.params!r}, body={0.body!r})'.format(self)
-
-
-class Declaration(Expr):
-	"""
-	Lambda function definition.
-	ex: `(lambda (x y) (+ x y))`
-	"""
-
-	def __init__(self, name, value):
-		self.name = name
-		self.value = value
-
-	def __repr__(self):
-		return 'Declaration(name={0.name!r}, value={0.value!r})'.format(self)
 
 
 class Variable(Expr):
@@ -93,7 +115,6 @@ class Variable(Expr):
 class Literal(Expr):
 	"""
 	Abstract literal expression.
-	ex: `42`, `3.14`
 	"""
 
 	def __init__(self, value):
@@ -114,4 +135,18 @@ class FloatLiteral(Literal):
 	"""
 	Floating point number literal expression.
 	ex: `3.14`
+	"""
+
+
+class CharLiteral(Literal):
+	"""
+	Literal character. May be escaped.
+	ex: `'a'`, `'\\t'`
+	"""
+
+
+class StringLiteral(Literal):
+	"""
+	Literal sequence of potentially escaped characters.
+	ex: `"this is a string !\\nnew line here"`
 	"""
