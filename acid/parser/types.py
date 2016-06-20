@@ -58,10 +58,14 @@ class SourceSpan:
 
 	def __str__(self):
 		if self.start.line == self.end.line:
-			fmt = 'line {line} from column {colstart} to column {colend}'
+			fmt = 'line {line} from column {start} to column {end}'
 			return fmt.format(line=self.start.line,
-					   		  colstart=self.start.column,
-					   		  colend=self.end.column)
+					   		  start=self.start.column,
+					   		  end=self.end.column)
 
 		else:
 			return '{0.start!s} to {0.end!s}'.format(self)
+
+	@classmethod
+	def between(cls, first, last):
+		return cls(first.span.start, last.span.end)

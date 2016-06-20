@@ -8,9 +8,11 @@ Contributors: myrma
 """
 
 import functools
+from collections import defaultdict
 
 from acid.parser.ast import *
 from acid.parser.lexer import TokenType, tokenize
+from acid.parser.types import SourcePos
 from acid.exception import ParseError
 
 
@@ -21,12 +23,18 @@ class Parser:
 	Registers some consumers to parse the AST.
 	"""
 
-	expr_consumers = []
-	stmt_consumers = []
+	consumers = defaultdict(list)
 
 	def __init__(self, code, path=None):
 		self.path = path
 		self.code = code
+		self.token_queue = list(tokenize(self.code))  # the tokenized string
+
+		if self.token_queue:
+			self.end_pos = self.token_queue[-1].pos
+		else:
+			self.end_pos = SourcePos(1, 1)
+
 		self.error = None
 
 	@classmethod
@@ -36,40 +44,17 @@ class Parser:
 			return cls(code, path)
 
 	@classmethod
-	def register_expr(cls, priority=1):
+	def from_string(cls, code, path=None):
 		"""
-		Registers a given consumer function with a priority. `priority` is an
-		integer defining the order in which expression types try to parse from
-		the token queue. The closest this number if from 1, the highest will be
-		its priority.
-
-		`priority` must be greater than one (not strictly).
+		Parses the given code, without needing to instantiate a Parser object.
 		"""
 
-		def _decorator_wrapper(consumer):
-			@functools.wraps(consumer)
-			def _consumer_wrapper(self, token_queue):
-				# copies the token list
-				tmp_queue = token_queue[:]
-
-				try:
-					node = consumer(self, tmp_queue)
-				except ParseError:
-					raise
-				except IndexError:
-					# when the user tries to call token_queue.pop(0)
-					raise ParseError(token_queue[0].pos, 'Unexpected EOF')
-				else:
-					# assign tmp_queue to reference token_queue
-					token_queue[:] = tmp_queue
-					return node
-
-			cls.expr_consumers.insert(priority - 1, _consumer_wrapper)
-
-		return _decorator_wrapper
+		parser = cls(code, path)
+		ast = parser.run()
+		return ast
 
 	@classmethod
-	def register_stmt(cls, priority=1):
+	def register(cls, node_type, priority=1):
 		"""
 		Registers a given consumer function with a priority. `priority` is an
 		integer defining the order in which expression types try to parse from
@@ -81,109 +66,150 @@ class Parser:
 
 		def _decorator_wrapper(consumer):
 			@functools.wraps(consumer)
-			def _consumer_wrapper(self, token_queue):
+			def _consumer_wrapper(self):
 				# copies the token list
-				tmp_queue = token_queue[:]
+				tmp_queue = self.token_queue[:]
 
 				try:
-					node = consumer(self, tmp_queue)
+					node = consumer(self)
+
+					if node is None:
+						raise ParseError(self.code, pos, 'Consumer returned None')
+
 				except ParseError:
+					# restore previous token list value
+					# assign tmp_queue to reference token_queue
+					self.token_queue[:] = tmp_queue
+
 					raise
 				except IndexError:
-					# when the user tries to call token_queue.pop(0)
-					raise ParseError(token_queue[0].pos, 'Unexpected EOF')
-				else:
 					# assign tmp_queue to reference token_queue
-					token_queue[:] = tmp_queue
+					self.token_queue[:] = tmp_queue
+
+					# when the user tries to call token_queue.pop(0) but all
+					# tokens were consumed
+					raise ParseError(
+						self.code,
+						self.end_pos,
+						'Unexpected EOF') from None
+				else:
 					return node
 
-			cls.stmt_consumers.insert(priority - 1, _consumer_wrapper)
+			# decrement because highest priority is 1, not 0
+			_consumer_wrapper.priority = priority - 1
+			cls.consumers[node_type].append(_consumer_wrapper)
 
 		return _decorator_wrapper
 
-	def consume_expr(self, token_queue):
+
+	def get_consumer_queue(self, node_type):
 		"""
-		Tries to parse an Expr node from a token list.
+		Returns the list of consumers that parses nodes of a give type, taking
+		into account the priorities.
+		"""
+
+		consumers = list(self.consumers[node_type])
+
+		# reverse MRO: walks down the subclass tree
+		for sub_node_type in node_type.sub_types():
+			consumers.extend(self.consumers[sub_node_type])
+
+		# sort the list by priority
+		consumers.sort(key=lambda cons: cons.priority)
+
+		return consumers
+
+	def consume(self, node_type):
+		"""
+		Tries to consume a node of type `node_type` from the token list.
 		This does not affect the list if the function failed to parse.
 		"""
 
-		# tries every concrete Expr node
-		for consumer in self.expr_consumers:
+		consumers = self.get_consumer_queue(node_type)
+
+		# tries every concrete nodes of type node_type
+		for consumer in consumers:
 			try:
-				node = consumer(self, token_queue)
+				node = consumer(self)
 			except ParseError as e:
 				error = e
 				continue
 			else:
 				return node
 		else:
-			# when every expr node has been tried, but none succeeded to parse
+			# when every node has been tried, but none succeeded to parse
 			raise error
 
-	def consume_stmt(self, token_queue):
+	def parse(self, node_type):
 		"""
-		Tries to parse an Stmt node from a token list.
+		Tries to parse a node of type `node_type` from the token list.
 		This does not affect the list if the function failed to parse.
+		Fails if the entire token list is not matched.
 		"""
 
-		# tries every concrete Expr node
-		for consumer in self.stmt_consumers:
+		consumers = self.get_consumer_queue(node_type)
+
+		# tries every concrete nodes of type node_type
+		for consumer in consumers:
 			try:
-				node = consumer(self, token_queue)
+				tmp_queue = self.token_queue[:]
+				node = consumer(self)
+
+				# raises a ParseError if tokens are remaining unconsumed
+				if self.token_queue:
+					err = ParseError(
+						self.code,
+						self.token_queue[0].pos,
+						'The entire code could not be consumed.')
+					self.token_queue[:] = tmp_queue
+					raise err
+
 			except ParseError as e:
 				error = e
 				continue
 			else:
 				return node
 		else:
-			# when every stmt node has been tried, but none succeeded to parse
+			# when every node has been tried, but none succeeded to parse
 			raise error
 
+	def expect(self, token_type):
+		"""
+		Tries to consume a single token from the token queue.
+		Returns the token if the next token is of the given type, raises a
+		ParseError otherwise.
+		"""
+
+		token = self.token_queue.pop(0)
+
+		# if the next token is not of the expected type
+		if token.type != token_type:
+			msg = 'Expected {}, got {}'.format(token_type.name, token.type.name)
+			raise ParseError(self.code, token.pos, msg)
+
+		return token
+
+	def many(self, node_type):
+		"""
+		Consumes zero or more occurences of a node of a given type.
+		"""
+
+		consumed = []
+
+		while True:
+			try:
+				nxt = self.consume(node_type)
+			except ParseError:
+				break
+			else:
+				consumed.append(nxt)
+
+		return consumed
 
 	def run(self):
 		"""
 		Parses a given string into a Program object.
 		"""
 
-		token_queue = list(tokenize(self.code))  # the tokenized string
-		instrs = []                              # the instructions of the program
-
-		while token_queue:
-			try:
-				# tries to parse an expression from the token queue
-				instr = self.consume_stmt(token_queue)
-			except ParseError:
-				raise  # when no expression could be parsed
-			else:
-				# append the instruction to the program
-				instrs.append(instr)
-
-		# returns the resulting Program object.
-		return Program(instrs, self.path)
-
-
-def expect(token_type, token_queue):
-	"""
-	Tries to consume a single token from the token queue.
-	Returns the token if the next token is of the given type, raises a
-	ParseError otherwise.
-	"""
-
-	token = token_queue.pop(0)
-
-	# if the next token is not of the expected type
-	if token.type != token_type:
-		msg = 'Expected {}, got {}'.format(token_type.name, token.type.name)
-		raise ParseError(token.pos, msg)
-
-	return token
-
-
-def parse(code, path=None):
-	"""
-	Parses the given code, without needing to instantiate a Parser object.
-	"""
-
-	parser = Parser(code, path)
-	ast = parser.run()
-	return ast
+		program = self.parse(Program)
+		return program

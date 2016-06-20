@@ -3,6 +3,6 @@
 
 from acid.parser.parser import *
 from acid.parser.ast import *
-from acid.parser.rules import *
+from acid.parser.syntax import *
 from acid.parser.lexer import *
 from acid.parser.types import *

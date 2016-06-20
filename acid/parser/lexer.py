@@ -29,6 +29,7 @@ class TokenType(Enum):
 
 	DEFINE = r'define'
 	LAMBDA = r'lambda'
+	HASTYPE = r'(::|hastype)'
 	LINE_COMMENT = r'//'
 	COMMENT_START, COMMENT_END = r'/\*', r'\*/'
 	LPAREN, RPAREN = r'\(', r'\)'
@@ -36,7 +37,7 @@ class TokenType(Enum):
 	STRING_LITERAL = r'"([^"\\]|\\.)*"'
 	FLOAT_LITERAL = r'\d+\.\d+'
 	INT_LITERAL = r'\d+'
-	ATOM = r"[\w+\-'*/:,$<>=~#&|@ç^_%!?.]+"
+	ATOM = r"[\w+\-*/:,$<>=~#&|@ç^_%!?.]+"
 	WHITESPACE = r'\s+'
 
 
@@ -112,10 +113,10 @@ def tokenize(code):
 						endpos = cursor.copy()
 
 						span = SourceSpan(startpos, endpos)
-
-						yield Token(token_type, value, span)
+						tok = Token(token_type, value, span)
+						yield tok
 
 				break
 		else:
 			# when every token type has been tried
-			raise ParseError(cursor, "Failed to tokenize code")
+			raise ParseError(code, cursor, "Failed to tokenize code")

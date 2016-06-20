@@ -8,22 +8,44 @@ Contributors: myrma
 """
 
 __all__ = [
-	'Program',                       # program AST
-	'Stmt', 'Expr', 'Literal',       # abstract AST nodes
-	'Declaration', 'TopLevelExpr',   # top-level statement
-	'Call', 'Lambda',                # calls
-	'Variable',                      # atom
-	'IntLiteral', 'FloatLiteral',    # numeric literal
-	'CharLiteral', 'StringLiteral'   # string-related literals
+	'Node',                            # Base node
+	'Program',                         # program AST
+	'Stmt', 'Expr', 'Literal',         # abstract AST nodes
+	'Declaration', 'TypeDeclaration',  # assignment (value or type)
+	'Call', 'Lambda',                  # calls
+	'Variable',                        # atom
+	'IntLiteral', 'FloatLiteral',      # numeric literal
+	'CharLiteral', 'StringLiteral'     # string-related literals
 ]
 
 
-class Program:
+class Node:
+	"""
+	Abstract Acid AST node.
+	"""
+
+	def __init__(self):
+		self.span = None
+
+	@property
+	def pos(self):
+		if self.span is not None:
+			return self.span.start
+
+	@classmethod
+	def sub_types(cls):
+		for sub_type in cls.__subclasses__():
+			yield sub_type
+			yield from sub_type.sub_types()
+
+
+class Program(Node):
 	"""
 	Represents a sequence of instructions.
 	"""
 
 	def __init__(self, instructions, path=None):
+		super().__init__()
 		self.path = path
 		self.instructions = instructions
 
@@ -32,7 +54,7 @@ class Program:
 		return fmt.format(self)
 
 
-class Stmt:
+class Stmt(Node):
 	"""
 	Abstract AST element representing a top-level statement.
 	"""
@@ -45,6 +67,7 @@ class Declaration(Stmt):
 	"""
 
 	def __init__(self, name, value):
+		super().__init__()
 		self.name = name
 		self.value = value
 
@@ -52,20 +75,22 @@ class Declaration(Stmt):
 		return 'Declaration(name={0.name!r}, value={0.value!r})'.format(self)
 
 
-class TopLevelExpr(Stmt):
+class TypeDeclaration(Stmt):
 	"""
-	Regular expression at top-level.
-	ex: `(+ 1 2)`
+	Assigning a type to a name.
+	ex: `(:: not (lambda (Bool) Bool))`
 	"""
 
-	def __init__(self, expr):
-		self.expr = expr
+	def __init__(self, name, type):
+		super().__init__()
+		self.name = name
+		self.type = type
 
 	def __repr__(self):
-		return 'TopLevelExpr(expr={0.expr!r})'.format(self)
+		return 'TypeDeclaration(name={0.name!r}, type={0.type!r})'.format(self)
 
 
-class Expr:
+class Expr(Node):
 	"""
 	Abstract AST element representing an expression node.
 	"""
@@ -78,6 +103,7 @@ class Call(Expr):
 	"""
 
 	def __init__(self, func, args):
+		super().__init__()
 		self.func = func
 		self.args = args
 
@@ -92,6 +118,7 @@ class Lambda(Expr):
 	"""
 
 	def __init__(self, params, body):
+		super().__init__()
 		self.params = params
 		self.body = body
 
@@ -106,6 +133,7 @@ class Variable(Expr):
 	"""
 
 	def __init__(self, name):
+		super().__init__()
 		self.name = name
 
 	def __repr__(self):
@@ -118,6 +146,7 @@ class Literal(Expr):
 	"""
 
 	def __init__(self, value):
+		super().__init__()
 		self.value = value
 
 	def __repr__(self):

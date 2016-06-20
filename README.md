@@ -32,19 +32,19 @@ télécharger, puis exécuter la commande suivante dans le terminal:
 #### Windows
 
 ```
-py -3.4 acid examples/test.acid
+py -3.4 -Bm acid --exec examples\test.acid
 ```
 
 #### Unix (OS X et Linux)
 
 ```
-python3.4 acid examples/test.acid
+python3.4 -Bm acid --exec examples/test.acid
 ```
 
 Vous trouverez plus d'information en lançant la commande
 
 ```
-python3.4 acid --help
+python3.4 -Bm acid --help
 ```
 
 ## Recommandations
