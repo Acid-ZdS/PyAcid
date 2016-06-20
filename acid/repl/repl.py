@@ -44,6 +44,7 @@ class REPL:
     A read-eval-print loop that interactively runs Acid code.
     """
 
+    aliases = {}
     commands = OrderedDict()
 
     def __init__(self, path=None, prelude=default_env):
@@ -56,10 +57,28 @@ class REPL:
         self.running = False
 
     @classmethod
-    def register(cls, *command_aliases):
+    def get_command(cls, name):
+        """
+        Gets the function associated with the command from its name or alias.
+        """
+
+        try:
+            return cls.commands[name]
+        except KeyError:
+            realname = cls.aliases[name]
+            return cls.commands[realname]
+
+    @classmethod
+    def register(cls, name, *aliases):
+        """
+        Binds a function to a command by name.
+        """
+
         def _decorator_wrapper(fn):
-            for name in command_aliases:
-                cls.commands[name] = fn
+            cls.commands[name] = fn
+
+            for alias in aliases:
+                cls.aliases[alias] = name
 
             return fn
 
@@ -99,6 +118,14 @@ class REPL:
         cmd = parse_repl_line(inp)
         return cmd
 
+    def quit(self):
+        """
+        Stops the REPL and displays an exit message.
+        """
+
+        self.running = False
+        print('Goodbye.')
+
     def run(self, display_header=True):
         """
         Runs the REPL.
@@ -124,6 +151,7 @@ class REPL:
                     type(exc).__name__,
                     ''.join(map(str, exc.args))
                 ))
+                raise
             else:
                 self.cmd_count += 1
 
@@ -133,6 +161,7 @@ class REPL:
 
 REPL.register('load', 'l')(REPL.load)
 REPL.register('reload', 'r')(REPL.reload)
+REPL.register('quit', 'q')(REPL.quit)
 
 
 @REPL.register('prompt')
@@ -155,19 +184,12 @@ def clear(self):
 
     os.system('cls' if os.name == 'nt' else 'clear')
 
-
-@REPL.register('quit', 'q')
-def quit(self):
-    """
-    Stops the REPL and displays an exit message.
-    """
-
-    self.running = False
-    print('Goodbye.')
-
-
 @REPL.register('help', 'h')
 def help(self, command=None):
+    """
+    Lists all available command from the prompt or show help for a given command.
+    """
+
     if command is None:
         print('Commands available from the prompt:', end='\n' * 2)
 
@@ -176,10 +198,21 @@ def help(self, command=None):
         print('Showing help for command {!r}'.format(command))
         print(_get_command_desc(command))
 
+        aliases = []
+
+        for alias, name in self.aliases.items():
+            if name == command:
+                aliases.append(alias)
+
+        if len(aliases) == 1:
+            print('Alias: {!r}'.format(aliases[0]))
+        elif len(aliases) > 1:
+            print('Aliases:', ', '.join(map(repr, aliases)))
+
 
 def _get_command_desc(name):
     try:
-        fn = REPL.commands[name]
+        fn = REPL.get_command(name)
     except KeyError:
         print('Error: command {!r} is not defined.'.format(name))
 
@@ -192,8 +225,19 @@ def _get_command_desc(name):
     sig = inspect.signature(fn)
 
     # ignore the self parameter
-    for param in list(sig.parameters)[1:]:
-        arg_desc += '<{}> '.format(param)
+    for pname, param in list(sig.parameters.items())[1:]:
+        if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+            if param.default == inspect._empty:
+                arg_desc += '<{}> '.format(pname)
+            elif param.default is None:
+                arg_desc += '[{}] '.format(pname)
+            else:
+                arg_desc += '[{}={!r}] '.format(pname, param.default)
+        elif param.kind == inspect.Parameter.POSITIONAL_ONLY:
+            arg_desc += '[{} ...] '.format(pname)
+        else:
+            # dirty :(
+            pass
 
     desc = ':{name} {args}'.format(
         name=name,
