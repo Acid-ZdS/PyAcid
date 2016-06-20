@@ -151,7 +151,6 @@ class REPL:
                     type(exc).__name__,
                     ''.join(map(str, exc.args))
                 ))
-                raise
             else:
                 self.cmd_count += 1
 
