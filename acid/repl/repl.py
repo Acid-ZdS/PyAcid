@@ -112,10 +112,14 @@ class REPL:
         Reads a user-typed REPL command from the input stream.
         """
 
-        print(self.prompt.format(**self.__dict__), end='')
-        inp = input()
+        try:
+            inp = input(self.prompt.format(**self.__dict__))
+        except EOFError:
+            print('')
+            inp = ''
 
         cmd = parse_repl_line(inp)
+
         return cmd
 
     def quit(self):
@@ -133,12 +137,15 @@ class REPL:
 
         self.running = True
 
-        print(self.header)
+        if display_header:
+            print(self.header)
 
         while self.running:
             try:
                 cmd = self.read_command()
                 res = cmd.execute(self)
+            except KeyboardInterrupt:
+                print('Interrupted.')
             except Exception as exc:
                 if self.path is None:
                     msg = 'File <stdin>, input #{repl.cmd_count}'.format(repl=self)

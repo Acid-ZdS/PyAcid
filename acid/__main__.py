@@ -8,7 +8,6 @@ Contributors: myrma
 """
 
 import os
-import signal
 import argparse
 
 from acid.parser import Parser, tokenize
@@ -65,7 +64,6 @@ def compile(path):
 
 def interactive(path=None):
 	repl = REPL()
-	signal.signal(signal.SIGINT, lambda *_: repl.quit())
 
 	if path is not None:
 		repl.load(path)
