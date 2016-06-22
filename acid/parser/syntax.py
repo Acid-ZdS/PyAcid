@@ -105,6 +105,19 @@ def consume_lambda(self):
 	return lam
 
 
+@Parser.register(If, priority=1)
+def consume_if(self):
+	first = self.expect(TokenType.LPAREN)
+	self.expect(TokenType.IF)
+	cond = self.consume(Expr)
+	cons = self.consume(Expr)
+	alt = self.consume(Expr)
+	last = self.expect(TokenType.RPAREN)
+
+	if_ = If(cond, cons, alt)
+	if_.span = SourceSpan.between(first, last)
+	return if_
+
 @Parser.register(Variable, priority=1)
 def consume_variable(self):
 	atom = self.expect(TokenType.ATOM)

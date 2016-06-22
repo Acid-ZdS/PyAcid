@@ -54,6 +54,15 @@ def translate_lambda(compiler, lambda_):
 	)
 
 
+@Compiler.register(If)
+def translate_if(compiler, if_):
+	return python_ast.IfExp(
+		test=compiler.translate(if_.condition),
+		body=compiler.translate(if_.consequence),
+		orelse=compiler.translate(if_.alternative)
+	)
+
+
 @Compiler.register(Variable)
 def translate_variable(compiler, var):
 	return python_ast.Name(var.name, python_ast.Load())

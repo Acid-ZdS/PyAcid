@@ -12,7 +12,7 @@ __all__ = [
 	'Program',                         # program AST
 	'Stmt', 'Expr', 'Literal',         # abstract AST nodes
 	'Declaration', 'TypeDeclaration',  # assignment (value or type)
-	'Call', 'Lambda',                  # calls
+	'Call', 'Lambda', 'If',            # calls
 	'Variable',                        # atom
 	'IntLiteral', 'FloatLiteral',      # numeric literal
 	'CharLiteral', 'StringLiteral'     # string-related literals
@@ -124,6 +124,21 @@ class Lambda(Expr):
 
 	def __repr__(self):
 		return 'Lambda(params={0.params!r}, body={0.body!r})'.format(self)
+
+
+class If(Expr):
+	"""
+	Conditional control structure.
+	ex: `(if x y z)`
+	"""
+
+	def __init__(self, condition, consequence, alternative):
+		self.condition = condition
+		self.consequence = consequence
+		self.alternative = alternative
+
+	def __repr__(self):
+		return 'If(condition={0.condition!r}, consequence={0.consequence!r}, alternative={0.alternative!r})'.format(self)
 
 
 class Variable(Expr):
