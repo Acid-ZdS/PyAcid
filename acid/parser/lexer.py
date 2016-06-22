@@ -29,6 +29,7 @@ class TokenType(Enum):
 
 	DEFINE = r'define'
 	LAMBDA = r'lambda'
+	IF = r'if'
 	HASTYPE = r'(::|hastype)'
 	LINE_COMMENT = r'//'
 	COMMENT_START, COMMENT_END = r'/\*', r'\*/'
