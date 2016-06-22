@@ -53,7 +53,7 @@ class Compiler:
 
 		with open(path, 'rb') as compiled_file:
 			code = marshal.load(compiled_file)
-			exec(code, env)
+			exec(code, znv, env)
 
 			_run_main_function(env)
 
@@ -120,7 +120,7 @@ class Compiler:
 
 		code = self.compile()
 
-		exec(code, env)
+		exec(code, env, env)
 
 	def execute(self, prelude=default_env, mute_env=False):
 		"""
