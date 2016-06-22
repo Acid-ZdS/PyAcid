@@ -37,4 +37,11 @@ default_env = {
 	'#~': op.delitem,
 	'negate': op.neg,
 	'print': print,
+	'list': lambda *elts: list(elts),
+	'tuple': lambda *elts: tuple(elts),
+	'append': lambda x, xs: [x] + xs,
+	'foldl': lambda f, xs: reduce(f, xs),
+	'map': lambda f, xs: list(map(f, xs)),
+	'filter': lambda f, xs: list(filter(f, xs)),
+	'range': lambda start, end: list(range(start, end))
 }

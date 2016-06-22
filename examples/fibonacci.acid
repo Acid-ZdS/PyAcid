@@ -1,0 +1,16 @@
+/*
+ * Suite de Fibonacci
+ */
+
+// n-ième terme de la suite de Fibonacci
+(define fib (lambda (n)
+  (if (< n 2)
+    n
+    (+ (fib (- n 1)) (fib (- n 2)))
+  )
+))
+
+// Suite de Fibonacci jusqu'au n-ième terme
+(define fibSeq (lambda (n)
+  (map fib (range 0 n))
+))
