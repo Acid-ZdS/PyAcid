@@ -14,12 +14,20 @@ class ParseError(ValueError):
 	Raised when the parser fails to parse the code.
 	"""
 
-	def __init__(self, pos, msg):
+	def __init__(self, code, pos, msg):
+		self.code = code
 		self.pos = pos
 		self.msg = msg
 
+	@property
+	def line(self):
+		lines = self.code.splitlines()
+		return lines[self.pos.line - 1]
+
 	def __str__(self):
-		return """\
+		return """
+`{err.line}`
+{cursor_margin}^
 Parser failed to parse the code at {err.pos}:
 {err.msg}
-""".format(err=self)
+""".format(err=self, cursor_margin=' ' * self.pos.column)

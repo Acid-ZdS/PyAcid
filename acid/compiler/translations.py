@@ -30,11 +30,6 @@ def translate_declaration(compiler, declaration):
 	return assign
 
 
-@Compiler.register(TopLevelExpr)
-def translate_toplevel_expr(compiler, expr):
-	return python_ast.Expr(compiler.translate(expr.expr))
-
-
 @Compiler.register(Call)
 def translate_call(compiler, call):
 	return python_ast.Call(
